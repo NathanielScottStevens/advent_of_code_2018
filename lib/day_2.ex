@@ -60,5 +60,42 @@ defmodule Day2 do
     |> String.split("\n")
     |> get_checksum
   end
+
+  @doc ~S"""
+  Returns a list of indexes where
+  the strings don't match.
+
+  * Strings must both have the same length
+  """
+  def compare_strings({a, b}) do
+    Enum.zip(String.to_charlist(a), String.to_charlist(b))
+    |> Enum.reduce({0, []},
+        fn {a, b}, {index, acc} ->
+          if a != b do
+            {index + 1, acc ++ [index]}
+          else
+            {index + 1, acc}
+          end
+        end)
+    |> elem(1)
+  end
+
+  def get_all_possible_pairs(list) do
+    for a <- list, b <- tl(list) do {a, b} end
+  end
+
+  def part_b() do
+    {id, [unmatched]} = File.read!("data/day2.txt")
+    |> String.split("\n")
+    |> get_all_possible_pairs
+    |> Enum.map(fn {a, b} -> {a, compare_strings({a, b})} end)
+    |> Enum.filter(fn {_, x} -> Enum.count(x) == 1 end)
+    |> hd
+
+    id
+    |> String.to_charlist()
+    |> List.delete_at(unmatched)
+    |> List.to_string()
+  end
 end
 

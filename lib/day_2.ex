@@ -1,4 +1,10 @@
 defmodule Day2 do
+  def part_a() do
+    File.read!("data/day2.txt")
+    |> String.split("\n")
+    |> get_checksum
+  end
+
   @doc ~S"""
   Parses input of a newline separated file into
   a list of strings.
@@ -55,17 +61,32 @@ defmodule Day2 do
     end)
   end
 
-  def part_a() do
-    File.read!("data/day2.txt")
+  def part_b() do
+    {id, [unmatched]} = File.read!("data/day2.txt")
     |> String.split("\n")
-    |> get_checksum
+    |> get_all_possible_pairs # [{"abc", "azc"}, {"aaa", "bbb"}]
+    |> Enum.map(fn {a, b} -> {a, compare_strings({a, b})} end) # [{"abc", [1]}, {"aaa", [0, 1, 2]}]
+    |> Enum.filter(fn {_, x} -> Enum.count(x) == 1 end) # [{"abc", [1]}]
+    |> hd
+
+    id
+    |> String.to_charlist()
+    |> List.delete_at(unmatched)
+    |> List.to_string()
   end
 
-  @doc ~S"""
-  Returns a list of indexes where
-  the strings don't match.
+  def get_all_possible_pairs(list) do
+    for a <- list, b <- tl(list) do {a, b} end
+  end
 
-  * Strings must both have the same length
+  @doc """
+  Returns a tuple with the first of the compared strings
+  and a list of indices where the characters did not match.
+
+  ## Examples
+
+  iex> Day2.compare_strings({"abcd", "azcz"})
+  [1, 3]
   """
   def compare_strings({a, b}) do
     Enum.zip(String.to_charlist(a), String.to_charlist(b))
@@ -80,22 +101,5 @@ defmodule Day2 do
     |> elem(1)
   end
 
-  def get_all_possible_pairs(list) do
-    for a <- list, b <- tl(list) do {a, b} end
-  end
-
-  def part_b() do
-    {id, [unmatched]} = File.read!("data/day2.txt")
-    |> String.split("\n")
-    |> get_all_possible_pairs
-    |> Enum.map(fn {a, b} -> {a, compare_strings({a, b})} end)
-    |> Enum.filter(fn {_, x} -> Enum.count(x) == 1 end)
-    |> hd
-
-    id
-    |> String.to_charlist()
-    |> List.delete_at(unmatched)
-    |> List.to_string()
-  end
 end
 

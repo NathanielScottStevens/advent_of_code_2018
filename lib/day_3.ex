@@ -39,4 +39,25 @@ defmodule Day3 do
 
     overlapping_coords
   end
+
+  def part_b() do
+    input =
+      File.read!("data/day3.txt")
+      |> String.split("\n", trim: true)
+      |> Enum.map(&parse_input/1)
+
+    overlapping_coords =
+      input
+      |> reduce_to_overlapping
+
+    input
+    |> Enum.map(fn x -> {x.id, get_all_coords(x)} end)
+    |> Enum.filter(fn {_, v} ->
+          MapSet.intersection(overlapping_coords, v)
+          |> Enum.count
+          |> Kernel.==(0)
+        end)
+    |> Enum.at(0)
+    |> elem(0)
+  end
 end
